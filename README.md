@@ -26,7 +26,7 @@ systemctl stop firewalld.service #Stop firewall Service
 ~~~bash 
 systemctl disable firewalld.service # Disable the Firewall service,
 ~~~
-### 2- Hostname, Hostname, and Hadoop User 
+### 2- Hostname, DNS, and Hadoop User 
 You can use differnt IPs based on your network
 #### NamdeNode
 Change the hostname for master node
@@ -53,8 +53,9 @@ passwd hadoop             # Set Password
 ~~~
 ~~~bash
 echo "ALL ALL=(ALL) ALL" > /etc/sudoers.d/hadoop  # Add the Hadoop User to superuser
-
-su - hadoop
+~~~
+~~~bash
+su - hadoop   # Switch to hadoop user
 ~~~
 #### DataNodes
 Change the hostname for worker node which the n is the node number
@@ -81,7 +82,8 @@ passwd hadoop             # Set Password
 ~~~
 ~~~bash
 echo "ALL ALL=(ALL) ALL" > /etc/sudoers.d/hadoop  # Add the Hadoop User to superuser
-
+~~~
+~~~bash
 su - hadoop
 ~~~
 ### 3- SSH configuration

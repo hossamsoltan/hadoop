@@ -162,40 +162,248 @@ sudo vi ~/.bashrc   # add below Env Variables  for Java to .bashrc
 ~~~bash
 source ~/.bashrc
 ~~~
-## Run Locally  
 
-Clone the project  
+### 6- Configure Hadoop
+#### Namenode => Master
 
-~~~bash  
-  git clone https://link-to-project
+##### Configure Hadoop Daemon Variable
+
+###### hadoop-env.sh
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/hadoop-env.sh
+
+    export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
+    #allow a specific user to run the 
+    export HDFS_NAMENODE_USER="hadoop"
+    export HDFS_DATANODE_USER="hadoop"
+    export YARN_RESOURCEMANAGER_USER="hadoop"
+    export HDFS_SECONDARYNAMENODE_USER="hadoop"
+~~~
+##### Configuring the Hadoop Cluster
+###### workers
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/etc/hadoop/workers
+
+    node1
+    node2
+    node3
+~~~
+##### Configuring the Hadoop Daemons
+###### core-site.xml
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/core-site.xml
+
+    <configuration>
+      <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://master:9000</value>
+      </property>
+    </configuration>
+~~~
+###### hdfs-site.xml
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/hdfs-site.xml
+
+    <configuration>
+        <property>
+            <name>dfs.namenode.name.dir</name>
+            <value>~/hdfs/namenode</value>
+        </property>
+        <property>
+            <name>dfs.replication</name>
+            <value>3</value>
+        </property>
+    </configuration>
+
+~~~
+###### mapred-site.xml
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/mapred-site.xml
+
+    <configuration>
+      <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+      </property>
+      <property>
+        <name>yarn.app.mapreduce.am.env</name>
+        <value>HADOOP_MAPRED_HOME=/usr/local/hadoop</value>
+      </property>
+      <property>
+        <name>mapreduce.map.env</name>
+        <value>HADOOP_MAPRED_HOME=/usr/local/hadoop</value>
+      </property>
+      <property>
+        <name>mapreduce.reduce.env</name>
+        <value>HADOOP_MAPRED_HOME=/usr/local/hadoop</value>
+      </property>
+    </configuration>
+~~~
+###### yarn-site.xml
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/yarn-site.xml
+
+    <configuration>
+        <property>
+            <name>yarn.resourcemanager.hostname</name>
+            <value>master</value>
+        </property>
+        <property>
+            <name>yarn.nodemanager.aux-services</name>
+            <value>mapreduce_shuffle</value>
+        </property>
+        <property>
+            <name>yarn.nodemanager.aux-services.mapreduce.class</name>
+            <value>org.hadoop.mapred.shufflehandler</value>
+        </property>
+        <property>
+            <name>yarn.resourcemanager.webapp.address</name>
+            <value>master:8088</value>
+        </property>
+        <property>
+            <name>yarn.resourcemanager.resource-tracker.address</name>
+            <value>master:8031</value>
+        </property>
+    </configuration>
+
 ~~~
 
-Go to the project directory  
 
-~~~bash  
-  cd my-project
+#### DataNode => worker
+
+##### Configure Hadoop Daemon Variable
+
+###### hadoop-env.sh
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/hadoop-env.sh
+
+    export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
+    #allow a specific user to run the 
+    export HDFS_NAMENODE_USER="hadoop"
+    export HDFS_DATANODE_USER="hadoop"
+    export YARN_RESOURCEMANAGER_USER="hadoop"
+    export HDFS_SECONDARYNAMENODE_USER="hadoop"
+~~~
+##### Configuring the Hadoop Cluster
+###### workers
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/etc/hadoop/workers
+
+    node1
+    node2
+    node3
+~~~
+##### Configuring the Hadoop Daemons
+###### core-site.xml
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/core-site.xml
+
+    <configuration>
+      <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://master:9000</value>
+      </property>
+    </configuration>
+~~~
+###### hdfs-site.xml
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/hdfs-site.xml
+
+  <configuration>
+      <property>
+          <name>dfs.datanode.data.dir</name>
+          <value>~/hdfs/datanode</value>
+      </property>
+  </configuration>
+~~~
+###### mapred-site.xml
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/mapred-site.xml
+
+
+    <configuration>
+      <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+      </property>
+    </configuration>
+~~~
+###### yarn-site.xml
+~~~bash
+vi /usr/local/hadoop/etc/hadoop/yarn-site.xml
+
+
+    <configuration>
+        <property>
+            <name>yarn.resourcemanager.hostname</name>
+            <value>master</value>
+        </property>
+        <property>
+            <name>yarn.nodemanager.aux-services</name>
+            <value>mapreduce_shuffle</value>
+        </property>
+        <property>
+            <name>yarn.nodemanager.aux-services.mapreduce.class</name>
+            <value>org.hadoop.mapred.shufflehandler</value>
+        </property>
+        <property>
+            <name>yarn.resourcemanager.webapp.address</name>
+            <value>master:8088</value>
+        </property>
+        <property>
+            <name>yarn.resourcemanager.resource-tracker.address</name>
+            <value>master:8031</value>
+        </property>
+    </configuration>
 ~~~
 
-Install dependencies  
-
-~~~bash  
-npm install
+### 7- Hadoop Startup
+#### Namenode => master
+~~~bash
+hdfs namenode -format
+~~~
+~~~bash
+start-dfs.sh
+~~~
+~~~bash
+start-yarn.sh
 ~~~
 
-Start the server  
+### 8- Verify Hadoop Installation
+You can access the Hadoop web interface by navigating to http://<master_node>:9870/ in a web browser.
 
-~~~bash  
-npm run start
+master node
+~~~bash
+hdfs dfsadmin -report
 ~~~
 
-## Contributing  
-
-Contributions are always welcome!  
-
-See `contributing.md` for ways to get started.  
-
-Please adhere to this project's `code of conduct`.  
-
-## License  
-
-[MIT](https://choosealicense.com/licenses/mit/)
+### 9- Example and Testing
+####Step 1: Create a directory on HDFS
+~~~bash
+hdfs dfs -mkdir /input
+~~~
+#### Step 2: Copy a text file into the directory
+~~~bash
+echo "Hello World, this is a test file for Hadoop." > test.txt
+hdfs dfs -put test.txt /input/
+~~~
+#### Step 3: Run the WordCount example
+~~~bash
+hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.0.jar wordcount /input /output
+~~~
+#### Step 4: View the output
+~~~bash
+hdfs dfs -cat /output/part-r-00000
+~~~
+You should see output similar to:
+~~~kotlin
+Hello	1
+World,	1
+this	1
+is	1
+a	1
+test	1
+file	1
+for	1
+Hadoop.	1
+~~~
